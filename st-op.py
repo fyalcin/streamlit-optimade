@@ -15,7 +15,7 @@ from pymatgen.ext.matproj import MPRester
 from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as sga
 import streamlit as st
 from pymongo import MongoClient
-
+import seaborn as sns
 
 surfen_crystalium = {'mp-149': {'322': 1.39,
                                 '320': 1.45,
@@ -81,7 +81,7 @@ surfen_crystalium = {'mp-149': {'322': 1.39,
 #     cryst_data[millerstr] = surfen
 
 def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_level=True, to_poscar=False):
-    import seaborn as sns
+
     client = MongoClient(
         "mongodb+srv://tfroot:letsseeifthispasswordissecureenough@triboflow.pzgj2.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
     tf_surfen_coll = client['surfen_test']['PBE.slab_data.LEO']
