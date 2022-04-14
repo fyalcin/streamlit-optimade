@@ -95,6 +95,7 @@ def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_lev
     bulk_prim = Structure.from_dict(bulk_data['structure_equiVol'])
     bulk_conv = sga(bulk_prim).get_conventional_standard_structure()
     lattice = bulk_conv.lattice
+    formula_st = bulk_conv.composition.reduced_formula
 
     surfen_dict = {}
     surfen_data = data['miller_list']
@@ -144,18 +145,18 @@ def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_lev
     ax.legend(bbox_to_anchor=(1.025, 1), prop={'size': 8})
     # fig.savefig(fig_str, bbox_inches='tight', dpi=300)
 
-    return lattice, surfen_dict
+    return lattice, surfen_dict, formula_st
+
 
 title = st.text_input('Materials Project ID', 'mp-13')
 
-
 try:
-    lattice, surfen_dict = get_surfen_dict_from_mpid(title,
-                                                 coll='PBE.slab_data.LEO',
-                                                 high_level='surfen_test',
-                                                 to_poscar=False)
+    lattice, surfen_dict, formula = get_surfen_dict_from_mpid(title,
+                                                     coll='PBE.slab_data.LEO',
+                                                     high_level='surfen_test',
+                                                     to_poscar=False)
 except:
-    st.write('<span style="color:blue">some *blue* text</span>', title)
+    st.write(f'No result for {title} found in the database.')
 else:
     miller_list = [[int(x) for x in a] for a in list(surfen_dict.keys())]
     e_surf_list = list(surfen_dict.values())
@@ -163,9 +164,10 @@ else:
     wulff_plotly = wulff.get_plotly()
     # wulff_plotly.show()
 
-    surfen_dict = pd.DataFrame(surfen_dict.values(), surfen_dict.keys())
+    surfen_dict = pd.DataFrame(surfen_dict.values(), surfen_dict.keys()).transpose()
 
-    st.write('Showing results for', title)
+    st.write(f'# Showing results for {title} ({formula}):')
+    st.write(f'Surface energies were calculated as:')
     st.dataframe(surfen_dict)
-
+    st.write(f'Wulff construction:')
     st.plotly_chart(wulff_plotly)
