@@ -1,7 +1,6 @@
-matplotlib~=3.3.4
 numpy~=1.22.3
+pandas~=1.4.2
+seaborn~=0.11.2
 streamlit~=1.8.1
-seaborn~=0.11.1
-pymatgen~=2022.0.6
+pymatgen~=2022.3.29
 pymongo~=3.12.0
-dnspython~=1.16.0

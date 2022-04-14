@@ -155,7 +155,7 @@ try:
                                                  high_level='surfen_test',
                                                  to_poscar=False)
 except:
-    st.write('No results for', title)
+    st.write('<span style="color:blue">some *blue* text</span>', title)
 else:
     miller_list = [[int(x) for x in a] for a in list(surfen_dict.keys())]
     e_surf_list = list(surfen_dict.values())
