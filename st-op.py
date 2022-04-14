@@ -6,16 +6,16 @@ Created on Mon Nov  8 22:26:00 2021
 @author: firat
 """
 
-from pymatgen.analysis.wulff import WulffShape
 import matplotlib.pyplot as plt
 import numpy as np
-from pymatgen.core.structure import Structure
-from pymatgen.core.surface import Slab, get_symmetrically_distinct_miller_indices
-from pymatgen.ext.matproj import MPRester
-from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as sga
-import streamlit as st
-from pymongo import MongoClient
+import pandas as pd
 import seaborn as sns
+import streamlit as st
+from pymatgen.analysis.wulff import WulffShape
+from pymatgen.core.structure import Structure
+from pymatgen.core.surface import Slab
+from pymatgen.symmetry.analyzer import SpacegroupAnalyzer as sga
+from pymongo import MongoClient
 
 surfen_crystalium = {'mp-149': {'322': 1.39,
                                 '320': 1.45,
@@ -70,6 +70,7 @@ surfen_crystalium = {'mp-149': {'322': 1.39,
                                '111': 2.73,
                                '310': 3.43}}
 
+
 # with MPRester() as m:
 #     struct = m.get_structure_by_material_id('mp-13', conventional_unit_cell=True)
 # millers = get_symmetrically_distinct_miller_indices(struct, 3)
@@ -81,7 +82,6 @@ surfen_crystalium = {'mp-149': {'322': 1.39,
 #     cryst_data[millerstr] = surfen
 
 def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_level=True, to_poscar=False):
-
     client = MongoClient(
         "mongodb+srv://tfroot:letsseeifthispasswordissecureenough@triboflow.pzgj2.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
     tf_surfen_coll = client['surfen_test']['PBE.slab_data.LEO']
@@ -125,7 +125,7 @@ def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_lev
     count = 0
     for k, v in surfen_dict.items():
         if k == "310" and mpid == 'mp-13':
-             continue
+            continue
         surfen_lit = surfen_crystalium[mpid][k]
         surfen_our = v
         ax.scatter(surfen_lit, surfen_our, c=colors[count], label=k, s=100, edgecolors='black')
@@ -146,16 +146,26 @@ def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_lev
 
     return lattice, surfen_dict
 
+title = st.text_input('Materials Project ID', 'mp-134')
 
-lattice, surfen_dict = get_surfen_dict_from_mpid('mp-13',
+
+try:
+    lattice, surfen_dict = get_surfen_dict_from_mpid(title,
                                                  coll='PBE.slab_data.LEO',
                                                  high_level='surfen_test',
                                                  to_poscar=False)
+except:
+    st.write('No results for', title)
+else:
+    miller_list = [[int(x) for x in a] for a in list(surfen_dict.keys())]
+    e_surf_list = list(surfen_dict.values())
+    wulff = WulffShape(lattice, miller_list, e_surf_list)
+    wulff_plotly = wulff.get_plotly()
+    # wulff_plotly.show()
 
-miller_list = [[int(x) for x in a] for a in list(surfen_dict.keys())]
-e_surf_list = list(surfen_dict.values())
-wulff = WulffShape(lattice, miller_list, e_surf_list)
-wulff_plotly = wulff.get_plotly()
-# wulff_plotly.show()
+    surfen_dict = pd.DataFrame(surfen_dict.values(), surfen_dict.keys())
 
-st.plotly_chart(wulff_plotly)
+    st.write('Showing results for', title)
+    st.dataframe(surfen_dict)
+
+    st.plotly_chart(wulff_plotly)
