@@ -146,7 +146,7 @@ def get_surfen_dict_from_mpid(mpid, coll, fig_str=None, db_file='auto', high_lev
 
     return lattice, surfen_dict
 
-title = st.text_input('Materials Project ID', 'mp-134')
+title = st.text_input('Materials Project ID', 'mp-13')
 
 
 try:
